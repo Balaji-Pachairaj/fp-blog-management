@@ -1,4 +1,6 @@
+import { useRouter } from "next/router";
 import { useState } from "react";
+import { Blog_App_Routes } from "./config";
 
 // ── Icons ───────────────────────────────────────────────────────────
 
@@ -58,6 +60,7 @@ export default function BlogTopBar({
   onNewBlog,
   onLogout,
 }) {
+  const router = useRouter();
   const [newBlogHovered, setNewBlogHovered] = useState(false);
   const [logoutHovered, setLogoutHovered] = useState(false);
   const [adminHovered, setAdminHovered] = useState(false);
@@ -65,11 +68,13 @@ export default function BlogTopBar({
   // ── Handlers (override via props) ──
   const handleNewBlog = () => {
     if (onNewBlog) return onNewBlog();
+    router.push(Blog_App_Routes.BLOG_CREATE);
     console.log("New Blog clicked");
   };
 
   const handleLogout = () => {
     if (onLogout) return onLogout();
+    router.push(Blog_App_Routes.LOGIN);
     console.log("Logout clicked");
   };
 

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Blog_App_Routes } from "./config";
+import { useRouter } from "next/router";
 
 // ── Icons ───────────────────────────────────────────────────────────
 
@@ -114,7 +116,12 @@ const SettingsIcon = () => (
 
 const NAV_ITEMS = [
   // { id: "dashboard", label: "Dashboard", icon: DashboardIcon },
-  { id: "blogs", label: "Blogs", icon: BlogIcon },
+  {
+    id: "blogs",
+    label: "Blogs",
+    icon: BlogIcon,
+    path: Blog_App_Routes.BLOGLIST,
+  },
   // { id: "users",     label: "Users",     icon: UsersIcon },
   // { id: "services",  label: "Services",  icon: ServicesIcon },
   // { id: "analytics", label: "Analytics", icon: AnalyticsIcon },
@@ -132,11 +139,11 @@ function NavItem({ item, isActive, isExpanded, onClick }) {
   return (
     <li>
       <button
-        onClick={() => onClick(item.id)}
+        onClick={() => onClick(item.id, item?.path)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         title={!isExpanded ? item.label : undefined}
-        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative cursor-pointer
           ${
             isActive
               ? "bg-pink-50 text-[#e8007a]"
@@ -185,9 +192,13 @@ export default function BlogSideBar({ defaultActive = "blogs", onNavChange }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [toggleHovered, setToggleHovered] = useState(false);
 
-  const handleNavClick = (id) => {
+  // Navigate Hook
+  const router = useRouter();
+
+  const handleNavClick = (id, path) => {
     setActiveId(id);
     if (onNavChange) onNavChange(id);
+    if (path) router.push(path);
   };
 
   return (

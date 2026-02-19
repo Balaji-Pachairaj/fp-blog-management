@@ -10,6 +10,8 @@ import "react-quill-new/dist/quill.snow.css";
 import BlogTopBar from "@/blog_components/BlogTopBar";
 import BlogSideBar from "@/blog_components/BlogSideBar";
 import BlogAppLayout from "@/blog_components/BlogAppLayout";
+import { useRouter } from "next/router";
+import { Blog_App_Routes } from "@/blog_components/config";
 
 const quillModules = {
   toolbar: [
@@ -46,6 +48,7 @@ const quillFormats = [
 ];
 
 export default function NewBlogPage() {
+  const router = useRouter();
   const [blogData, setBlogData] = useState({
     heading: "",
     subHeading: "",
@@ -70,6 +73,7 @@ export default function NewBlogPage() {
 
   const handlePreview = () => {
     console.log("Previewing blog:", blogData);
+    router.push(Blog_App_Routes.BLOG_PREVIEW);
   };
 
   return (
