@@ -1,6 +1,9 @@
 import BlogAppLayout from "@/blog_components/BlogAppLayout";
 import BlogSideBar from "@/blog_components/BlogSideBar";
 import BlogTopBar from "@/blog_components/BlogTopBar";
+import { Blog_App_Full_API } from "@/blog_components/config";
+import UseBeAuthenticated from "@/blog_components/hooks/UseBeAuthenticated";
+import axios from "axios";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // ════════════════════════════════════════════════════════════════════
@@ -366,6 +369,9 @@ function SkeletonRow() {
 }
 
 function BlogList({ onEdit, onLinkClick }) {
+  // Be Authenticated
+  UseBeAuthenticated();
+
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -384,25 +390,38 @@ function BlogList({ onEdit, onLinkClick }) {
 
   // ── Load blogs ──────────────────────────────────────────────────
   const loadBlogs = useCallback(async () => {
+    setBlogs(() => {
+      return [];
+    });
     setLoading(true);
     setError(null);
     try {
-      // ── SWAP THIS BLOCK for real API call ──────────────────────
-      // const data = await blogApi.fetchAll({ search: debouncedQ });
-      // setBlogs(data.blogs);
-      // ──────────────────────────────────────────────────────────
+      const response = await axios.get(Blog_App_Full_API.BLOG_LIST);
+
+      const BLOGS_LIST = response.data.data.map((blog, index) => {
+        return {
+          id: index + 1,
+          title: blog.heading,
+          sub_title: blog.subHeading,
+          status: "Draft",
+        };
+      });
 
       // Mock: filter locally and simulate network delay
       await new Promise((r) => setTimeout(r, 800));
       const q = debouncedQ.toLowerCase();
-      const filtered = MOCK_BLOGS.filter(
-        (b) =>
-          !q ||
-          b.id.includes(q) ||
-          b.title.toLowerCase().includes(q) ||
-          b.createdBy.toLowerCase().includes(q) ||
-          b.status.toLowerCase().includes(q),
-      );
+      const filtered = BLOGS_LIST.filter((b) => {
+        if (!q) {
+          return true;
+        }
+        const filterText = q?.trim();
+        return (
+          b.title.toLowerCase().includes(filterText) ||
+          b?.sub_title?.toLowerCase()?.includes(filterText) ||
+          (b?.status?.toLowerCase() &&
+            b?.status?.toLowerCase()?.includes(filterText))
+        );
+      });
       setBlogs(filtered);
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -455,20 +474,18 @@ function BlogList({ onEdit, onLinkClick }) {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white max-w-[800px] w-full rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-[#e8c99e] text-gray-800">
-              {["ID", "Title", "Created by", "Status", "Link", "Edit"].map(
-                (h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3.5 text-left font-semibold tracking-wide text-xs uppercase"
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
+              {["ID", "Title", "Sub Title", "Status", "Edit"].map((h) => (
+                <th
+                  key={h}
+                  className="px-5 py-3.5 text-left font-semibold tracking-wide text-xs uppercase"
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -498,21 +515,10 @@ function BlogList({ onEdit, onLinkClick }) {
                     {blog.title}
                   </td>
                   <td className="px-5 py-3.5 text-gray-600">
-                    {blog.createdBy}
+                    {blog.sub_title}
                   </td>
                   <td className="px-5 py-3.5">
                     <StatusBadge status={blog.status} />
-                  </td>
-
-                  {/* Link */}
-                  <td className="px-5 py-3.5">
-                    <button
-                      onClick={() => onLinkClick?.(blog)}
-                      className="text-gray-400 hover:text-[#e8007a] transition-colors duration-150"
-                      title={blog.link}
-                    >
-                      <icons.Link />
-                    </button>
                   </td>
 
                   {/* Edit */}

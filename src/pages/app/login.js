@@ -1,3 +1,7 @@
+import { Blog_App_Full_API, Blog_App_Routes } from "@/blog_components/config";
+import { setToken } from "@/blog_components/config/utils";
+import axios from "axios";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 const EyeOpenIcon = () => (
@@ -155,6 +159,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const errors = validate(form);
   const isFormValid = Object.keys(errors).length === 0;
@@ -178,14 +183,21 @@ export default function Login() {
     setIsLoading(true);
     setSuccess(false);
 
-    try {
-      // ---------------------------------------------------
-      // API Call
-      // ---------------------------------------------------
+    const { email, password } = form;
 
+    try {
+      const response = await axios.get(Blog_App_Full_API.LOGIN, {
+        params: {
+          email: email,
+          password: password,
+        },
+      });
+
+      setToken(response?.data?.token);
       setSuccess(true);
+      router.push(Blog_App_Routes.BLOGLIST);
     } catch (err) {
-      console.error("Login failed:", err);
+      console.log("Login failed:", err);
     } finally {
       setIsLoading(false);
     }

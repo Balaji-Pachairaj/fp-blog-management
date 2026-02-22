@@ -1,7 +1,9 @@
 "use client";
 
+import { getPreview } from "@/blog_components/config/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 // ─── Sample / default props ───────────────────────────────────────────────────
 const DEFAULT_BLOG = {
@@ -235,13 +237,31 @@ function BlogContentRenderer({ html }) {
 }
 
 // ─── Main PreviewBlog Component ───────────────────────────────────────────────
-export default function PreviewBlog({
-  heading = DEFAULT_BLOG.heading,
-  subHeading = DEFAULT_BLOG.subHeading,
-  coverImage = DEFAULT_BLOG.coverImage,
-  mainImage = DEFAULT_BLOG.mainImage,
-  content = DEFAULT_BLOG.content,
-}) {
+export default function PreviewBlog({}) {
+  const [blogContent, setBlogContent] = useState({
+    heading: DEFAULT_BLOG.heading,
+    subHeading: DEFAULT_BLOG.subHeading,
+    coverImage: DEFAULT_BLOG.coverImage,
+    mainImage: DEFAULT_BLOG.mainImage,
+    content: DEFAULT_BLOG.content,
+  });
+
+  useEffect(() => {
+    // Set Intervals
+    const interval = setInterval(() => {
+      const blog = getPreview();
+      setBlogContent((state) => {
+        return {
+          ...state,
+          ...blog,
+        };
+      });
+    }, 100);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       <Navbar />
@@ -249,21 +269,21 @@ export default function PreviewBlog({
       <main className="max-w-3xl mx-auto px-6 py-14">
         {/* Heading */}
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-5">
-          {heading}
+          {blogContent.heading}
         </h1>
 
         {/* Sub Heading */}
-        {subHeading && (
+        {blogContent.subHeading && (
           <p className="text-base text-gray-500 leading-relaxed mb-8 border-l-4 border-pink-400 pl-4">
-            {subHeading}
+            {blogContent.subHeading}
           </p>
         )}
 
         {/* Main Image — rendered inline if present but not already in content */}
-        {mainImage && (
+        {blogContent.mainImage && (
           <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden my-10 shadow-md">
             <Image
-              src={mainImage}
+              src={blogContent.mainImage}
               alt="Blog main visual"
               fill
               className="object-cover"
@@ -285,7 +305,7 @@ export default function PreviewBlog({
         )} */}
 
         {/* Rich Blog Content (from Quill) */}
-        <BlogContentRenderer html={content} />
+        <BlogContentRenderer html={blogContent.content} />
       </main>
 
       <Footer />
